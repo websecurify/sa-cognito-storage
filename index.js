@@ -1,24 +1,38 @@
 var setup = function () {
-    var iframe = document.createElement('iframe')
+    var iframe = document.querySelector('iframe[src="https://fs.secapps.com"]')
 
-    iframe.src = 'https://fs.secapps.com'
-    iframe.style = 'display: none'
+    if (!iframe) {
+        iframe = document.createElement('iframe')
 
-    document.body.appendChild(iframe)
+        iframe.src = 'https://fs.secapps.com'
+        iframe.style = 'display: none'
+
+        document.body.appendChild(iframe)
+    }
 
     return new Promise(function (resolve, reject) {
-        iframe.onload = function () {
+        if (iframe.contentDocument.readyState === 'complete') {
             var documentDomain = document.domain
 
             document.domain = 'secapps.com'
 
-            resolve(iframe.contentWindow.localStorage)
+            resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
 
             document.document = documentDomain
-        }
+        } else {
+            iframe.onload = function () {
+                var documentDomain = document.domain
 
-        iframe.onerror = function (error) {
-            reject(error)
+                document.domain = 'secapps.com'
+
+                resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
+
+                document.document = documentDomain
+            }
+
+            iframe.onerror = function (error) {
+                reject(error)
+            }
         }
     })
 }
@@ -28,8 +42,8 @@ module.exports = function (callback) {
 
     if (callback) {
         promise
-        .then(function (storage) {
-            callback(null, storage)
+        .then(function (result) {
+            callback(null, result.storage, result.source)
         })
         .catch(function (error) {
             callback(error)

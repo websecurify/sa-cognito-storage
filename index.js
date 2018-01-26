@@ -11,7 +11,7 @@ var setup = function () {
     }
 
     return new Promise(function (resolve, reject) {
-        if (iframe.contentDocument.readyState === 'complete') {
+        if (iframe.contentDocument.readyState === 'complete' && iframe.contentDocument.domain === 'secapps.com') {
             var documentDomain = document.domain
 
             document.domain = 'secapps.com'
@@ -20,7 +20,10 @@ var setup = function () {
 
             document.document = documentDomain
         } else {
-            iframe.onload = function () {
+            function onLoadHandler() {
+                iframe.removeEventListener('load', onLoadHandler)
+                iframe.removeEventListener('error', onErrorHandler)
+
                 var documentDomain = document.domain
 
                 document.domain = 'secapps.com'
@@ -30,9 +33,15 @@ var setup = function () {
                 document.document = documentDomain
             }
 
-            iframe.onerror = function (error) {
+            function onErrorHandler(error) {
+                iframe.removeEventListener('load', onLoadHandler)
+                iframe.removeEventListener('error', onErrorHandler)
+
                 reject(error)
             }
+
+            iframe.addEventListener('load', onLoadHandler)
+            iframe.addEventListener('error', onErrorHandler)
         }
     })
 }

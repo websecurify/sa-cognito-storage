@@ -24,13 +24,6 @@ var setup = function () {
 }
 
 module.exports = function (callback) {
-    var iframe = document.createElement('iframe')
-
-    iframe.src = config.remote
-    iframe.style = 'display: none'
-
-    document.body.appendChild(iframe)
-
     var promise = setup()
 
     if (callback) {

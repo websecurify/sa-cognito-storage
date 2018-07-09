@@ -12,6 +12,8 @@ var setup = function () {
         iframe.style = 'display: none'
 
         document.body.appendChild(iframe)
+    } else {
+        console.log('[cognito-storage] Frame already initiated.')
     }
 
     return new Promise(function (resolve, reject) {
@@ -23,11 +25,13 @@ var setup = function () {
             acquired = false
         }
 
-        if (own) {
+        if (acquired) {
             console.log('[cognito-storage] Frame acquired.')
 
             resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
         } else {
+            console.log('[cognito-storage] Frame is loading.')
+
             function onLoadHandler() {
                 iframe.removeEventListener('load', onLoadHandler)
                 iframe.removeEventListener('error', onErrorHandler)

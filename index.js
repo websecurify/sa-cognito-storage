@@ -1,7 +1,11 @@
+document.domain = 'secapps.com'
+
 var setup = function () {
     var iframe = document.querySelector('iframe[src="https://fs.secapps.com"]')
 
     if (!iframe) {
+        console.log('[cognito-storage] Initiating frame.')
+
         iframe = document.createElement('iframe')
 
         iframe.src = 'https://fs.secapps.com'
@@ -11,26 +15,26 @@ var setup = function () {
     }
 
     return new Promise(function (resolve, reject) {
-        if (iframe.contentDocument.readyState === 'complete' && iframe.contentDocument.domain === 'secapps.com') {
-            var documentDomain = document.domain
+        var acquired
 
-            document.domain = 'secapps.com'
+        try {
+            acquired = iframe.contentDocument.readyState === 'complete' && iframe.contentDocument.domain === 'secapps.com'
+        } catch(e) {
+            acquired = false
+        }
+
+        if (own) {
+            console.log('[cognito-storage] Frame acquired.')
 
             resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
-
-            document.document = documentDomain
         } else {
             function onLoadHandler() {
                 iframe.removeEventListener('load', onLoadHandler)
                 iframe.removeEventListener('error', onErrorHandler)
 
-                var documentDomain = document.domain
-
-                document.domain = 'secapps.com'
+                console.log('[cognito-storage] Frame acquired.')
 
                 resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
-
-                document.document = documentDomain
             }
 
             function onErrorHandler(error) {
@@ -51,12 +55,12 @@ module.exports = function (callback) {
 
     if (callback) {
         promise
-        .then(function (result) {
-            callback(null, result.storage, result.source)
-        })
-        .catch(function (error) {
-            callback(error)
-        })
+            .then(function (result) {
+                callback(null, result.storage, result.source)
+            })
+            .catch(function (error) {
+                callback(error)
+            })
     } else {
         return promise
     }

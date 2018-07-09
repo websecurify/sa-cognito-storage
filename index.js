@@ -28,6 +28,12 @@ var setup = function () {
         if (acquired) {
             console.log('[cognito-storage] Frame acquired.')
 
+            try {
+                iframe.contentWindow.localStorage.getItem('396ffe8d-260f-4693-b5a6-23286fd365ce')
+            } catch (e) {
+                console.error('[cognito-storage] localStorage inaccessible')
+            }
+
             resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
         } else {
             console.log('[cognito-storage] Frame is loading.')
@@ -37,6 +43,12 @@ var setup = function () {
                 iframe.removeEventListener('error', onErrorHandler)
 
                 console.log('[cognito-storage] Frame acquired.')
+
+                try {
+                    iframe.contentWindow.localStorage.getItem('396ffe8d-260f-4693-b5a6-23286fd365ce')
+                } catch (e) {
+                    console.error('[cognito-storage] localStorage inaccessible')
+                }
 
                 resolve({storage: iframe.contentWindow.localStorage, source: iframe.contentWindow})
             }
